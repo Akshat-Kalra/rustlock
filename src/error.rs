@@ -6,11 +6,11 @@ pub enum RustlockError {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
 
-    #[error("Cryptography error")]
-    Crypto(#[from] aes_gcm::Error),
+    #[error("Encryption error: {0}")]
+    Crypto(String),
 
     #[error("Key derivation error: {0}")]
-    KeyDerivation(#[from] argon2::Error),
+    KeyDerivation(String),
 
     #[error("Serialization error: {0}")]
     Serialization(#[from] serde_json::Error),
