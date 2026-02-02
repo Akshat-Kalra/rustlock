@@ -5,6 +5,10 @@ use clap::{Parser, Subcommand};
 #[command(about = "A local password manager")]
 
 pub struct Cli {
+
+    #[arg(short, long)]
+    pub password: Option<String>,
+
     #[command(subcommand)]
     pub command: Commands,
 }
