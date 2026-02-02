@@ -15,9 +15,6 @@ pub enum RustlockError {
     #[error("Serialization error: {0}")]
     Serialization(#[from] serde_json::Error),
 
-    #[error("Vault error: {0}")]
-    Vault(String),
-
     #[error("Invalid input: {0}")]
     InvalidInput(String),
 }

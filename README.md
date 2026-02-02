@@ -12,14 +12,30 @@ This is a personal tool that stores passwords locally in an encrypted vault.
 - Argon2id key derivation (memory-hard, resistant to GPU attacks)
 - Secrets are zeroized from memory after use
 
-## Status
+## Install
 
-Work in progress.
-
-## Build
+Requires [Rust](https://rustup.rs/).
 
 ```bash
-cargo build --release
+git clone https://github.com/yourusername/rustlock.git
+cd rustlock
+cargo install --path .
+```
+
+## Usage
+
+```bash
+# Add a new entry (generates password automatically)
+rustlock add github.com myusername
+
+# List all entries
+rustlock list
+
+# Get a specific entry
+rustlock get github.com
+
+# Generate a standalone password
+rustlock generate 24
 ```
 
 ## License
