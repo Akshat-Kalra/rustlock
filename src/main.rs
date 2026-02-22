@@ -4,6 +4,7 @@ mod crypto;
 mod vault;
 mod storage;
 mod cli;
+mod tui;
 
 use cli::{Commands, Cli};
 use error::Result;
@@ -75,7 +76,7 @@ fn run() -> Result<()> {
                 None => {
                     eprintln!("No entry found for {}", website);
                     std::process::exit(1);
-                }       
+                }
             };
 
             println!("Website: {}", entry.website);
@@ -85,7 +86,6 @@ fn run() -> Result<()> {
 
         }
         Commands::List => {
-            // Handle list command
             let path = vault_path();
             let master_password = prompt_master_password(false);
 
@@ -107,6 +107,31 @@ fn run() -> Result<()> {
         Commands::Generate { length } => {
             let pw = password::generate_password(length, true, true, true)?;
             println!("Generated password: {}", pw);
+        }
+        Commands::Tui => {
+            let path = vault_path();
+            let master_password = prompt_master_password(!path.exists());
+
+            let mut vault: vault::Vault = if path.exists() {
+                let encrypted = storage::load_vault(&path)?;
+                let key = crypto::derive_key(&master_password, &encrypted[..16])?;
+                let decrypted = crypto::decrypt(&key, &encrypted[16..])?;
+                serde_json::from_slice(&decrypted)?
+            } else {
+                vault::Vault::new()
+            };
+
+            let modified = tui::run(&mut vault)?;
+
+            if modified {
+                let json = serde_json::to_vec(&vault)?;
+                let key = crypto::derive_key(&master_password, &vault.salt)?;
+                let encrypted = crypto::encrypt(&key, &json)?;
+                let mut data = vault.salt.clone();
+                data.extend(encrypted);
+                storage::save_vault(&path, &data)?;
+                println!("Vault saved.");
+            }
         }
     }
 

@@ -17,14 +17,14 @@ pub struct Cli {
 pub enum Commands {
     Add {
         website: String,
-        username: String
+        username: String,
     },
     Get {
-        website: String
+        website: String,
     },
     List,
     Generate {
         length: usize,
     },
-
-    }
+    Tui,
+}
