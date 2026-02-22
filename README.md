@@ -2,16 +2,28 @@
 
 A local-first command-line password manager written in Rust.
 
+<!-- Screenshot: TUI list view with a few entries -->
+![TUI list view](docs/screenshots/tui-list.png)
+
 ## Why
 
-Rustlock stores everything locally in an encrypted vault that never leaves my machine.
+Rustlock stores everything locally in an encrypted vault that never leaves my machine. No cloud sync, no accounts, no subscriptions — just an encrypted file on disk.
 
 ## Features
 
+- **TUI** — interactive terminal UI to browse, add, and delete credentials
 - **Generate** cryptographically secure passwords (92-character alphabet, OS-level entropy)
 - **Store** credentials with AES-256-GCM authenticated encryption
 - **Retrieve** passwords by website name
 - **List** all stored entries
+
+## Demo
+
+<!-- Screenshot: TUI detail view with password hidden -->
+![Detail view](docs/screenshots/tui-detail.png)
+
+<!-- Screenshot: TUI add-entry form -->
+![Add entry form](docs/screenshots/tui-add.png)
 
 ## Security
 
@@ -41,8 +53,29 @@ cargo install --path .
 
 ## Usage
 
+### TUI (recommended)
+
 ```bash
-# Add a new entry (generates 20-char password automatically)
+rustlock tui
+```
+
+<!-- Screenshot: full TUI with help bar visible -->
+![TUI overview](docs/screenshots/tui-overview.png)
+
+| Key | Action |
+|-----|--------|
+| `↑↓` | Navigate entries |
+| `Enter` | View entry details |
+| `a` | Add new entry |
+| `g` | Generate a password |
+| `d` | Delete entry |
+| `Space` | Reveal / hide password (in detail view) |
+| `q` / `Esc` | Go back / quit |
+
+### CLI
+
+```bash
+# Add a new entry (auto-generates a 20-char password)
 rustlock add github.com myusername
 
 # List all stored entries
