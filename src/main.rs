@@ -1,11 +1,7 @@
-mod error;
-mod password;
-mod crypto;
-mod vault;
-mod storage;
 mod cli;
 mod tui;
 
+use rustlock::{crypto, vault, storage, password, error};
 use cli::{Commands, Cli};
 use error::Result;
 use clap::Parser;
