@@ -1,15 +1,11 @@
-async function getMasterPassword() {
-  const { mp } = await chrome.storage.session.get('mp');
-  return mp ?? null;
-}
-
-async function setMasterPassword(pw) {
-  await chrome.storage.session.set({ mp: pw });
+async function getDerivedKey() {
+  const { dk } = await chrome.storage.session.get('dk');
+  return dk ?? null;
 }
 
 async function send(msg) {
-  const mp = await getMasterPassword();
-  return chrome.runtime.sendMessage({ ...msg, master_password: mp });
+  const dk = await getDerivedKey();
+  return chrome.runtime.sendMessage({ ...msg, derived_key: dk });
 }
 
 async function showCredentials() {
@@ -18,7 +14,7 @@ async function showCredentials() {
   const box = document.getElementById('creds');
   box.innerHTML = '';
   if (!resp.ok) { document.getElementById('status').textContent = resp.error; return; }
-  if (!resp.credentials.length) {
+  if (!resp.credentials?.length) {
     box.textContent = 'No credentials for this site.';
     return;
   }
@@ -56,12 +52,13 @@ async function checkPendingSave() {
 document.getElementById('unlock-btn').onclick = async () => {
   const mp = document.getElementById('mp').value;
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  const resp = await chrome.runtime.sendMessage({ action: 'get_credentials', url: tab.url, master_password: mp });
+  // Derive the key from the master password; do not store the password itself.
+  const resp = await chrome.runtime.sendMessage({ action: 'derive_key', master_password: mp });
   if (!resp.ok) {
     document.getElementById('status').textContent = resp.error;
     return;
   }
-  await setMasterPassword(mp);
+  await chrome.storage.session.set({ dk: resp.key });
   document.getElementById('unlock-view').style.display = 'none';
   document.getElementById('main-view').style.display = 'block';
   await showCredentials();
@@ -69,24 +66,17 @@ document.getElementById('unlock-btn').onclick = async () => {
 };
 
 document.getElementById('lock-btn').onclick = async () => {
-  await chrome.storage.session.remove('mp');
+  await chrome.storage.session.remove('dk');
   document.getElementById('main-view').style.display = 'none';
   document.getElementById('unlock-view').style.display = 'block';
 };
 
 (async () => {
-  const mp = await getMasterPassword();
-  if (mp) {
+  const dk = await getDerivedKey();
+  if (dk) {
     document.getElementById('unlock-view').style.display = 'none';
     document.getElementById('main-view').style.display = 'block';
     await showCredentials();
     await checkPendingSave();
   }
 })();
-
-// Store pending save from content script
-chrome.runtime.onMessage.addListener(async (msg) => {
-  if (msg.action === 'offer_save') {
-    await chrome.storage.session.set({ pendingSave: { website: msg.website, username: msg.username, password: msg.password } });
-  }
-});

@@ -34,6 +34,16 @@ impl Vault {
         self.entries.push(entry);
     }
 
+    pub fn upsert_entry(&mut self, website: String, username: String, password: String) {
+        if let Some(entry) = self.entries.iter_mut()
+            .find(|e| e.website == website && e.username == username)
+        {
+            entry.password = password;
+        } else {
+            self.entries.push(Entry { website, username, password });
+        }
+    }
+
     pub fn find_entry(&self, website: &str) -> Option<&Entry> {
         for entry in &self.entries {
             if entry.website == website {
